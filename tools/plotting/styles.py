@@ -28,6 +28,7 @@ ssig3 = Style(fillColor=0, fillStyle=0, lineColor=5)
 ssig4 = Style(fillColor=0, fillStyle=0, lineColor=6)
 ssig5 = Style(fillColor=0, fillStyle=0, lineColor=7)
 ssig6 = Style(fillColor=0, fillStyle=0, lineColor=8)
+sQCD = sfakes
 
 histPref = {
     'DY': {'style':sdy, 'layer':12, 'legend':'Z #rightarrow ll (l #rightarrow #tau_{h})', 'stack': True},
@@ -39,8 +40,11 @@ histPref = {
     'VV': {'style':sDiboson, 'layer':4, 'legend':'VV', 'stack': True},
     'EWK': {'style':sDiboson, 'layer':5, 'legend':'EWK', 'stack': True},
     'data_obs': {'style':sdata, 'layer':0, 'legend':'data', 'stack': False},
+    'QCD': {'style':sfakes, 'layer':16, 'legend':'QCD', 'stack': True},
+    'MC': {'style':sdy, 'layer':14, 'legend':'Simulation', 'stack': True},
     'fakes': {'style':sfakes, 'layer':15, 'legend':'jet #rightarrow #tau_{h} fakes', 'stack': True},
     'jetFakes': {'style':sfakes, 'layer':15, 'legend':'jet #rightarrow #tau_{h} fakes', 'stack': True},
+    'data_obs_aiso_os': {'style':sQCD, 'layer':15, 'legend':'QCD', 'stack': True},
     'VVL': {'style':sDiboson, 'layer':4, 'legend':'Diboson-singleTop #rightarrow ll (l #rightarrow #tau_{h})', 'stack': True},
     'TTL': {'style':stt, 'layer':2, 'legend':'t#bar{t} #rightarrow ll (l #rightarrow #tau_{h})', 'stack': True},
     'ZL': {'style':sdy, 'layer':12, 'legend':'Z #rightarrow ll (l #rightarrow #tau_{h})', 'stack': True},

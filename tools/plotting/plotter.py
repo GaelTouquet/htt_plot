@@ -114,7 +114,7 @@ class Plotter(object):
             Xaxis.SetRangeUser(20,4000)
             ymax = max(self.plot.supportHist.weighted.GetBinContent(self.plot.supportHist.weighted.GetMaximumBin()),
                        self.plot.BGHist().weighted.GetBinContent(self.plot.BGHist().weighted.GetMaximumBin()))
-            Yaxis.SetRangeUser(0.0001,ymax*1.3)
+            Yaxis.SetRangeUser(0.0001,ymax*10)
             # self.plot.Blind(130,4000,False)
             self.pad.SetLogx()
         else:

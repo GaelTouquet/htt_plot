@@ -107,6 +107,9 @@ cuts_datacards = Cuts(
     jetFakes = '1',
     data = '1',
     embed = 'l1_gen_match == 5 && l2_gen_match == 5',
+    data_aiso_os = '1',
+    data_iso_ss = '1',
+    data_aiso_ss = '1'
 )
 cuts_datacards['TTL'] = cuts_datacards['ZL']
 cuts_datacards['Diboson_VVL'] = cuts_datacards['ZL']

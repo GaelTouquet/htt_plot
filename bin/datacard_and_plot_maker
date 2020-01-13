@@ -80,14 +80,14 @@ setTDRStyle(square=False)
 # datacards tools
 from htt_plot.tools.datacards import make_datacards
 
-# cuts
+#### cuts
 # signal_region_Embed_nofakes = cut_signal & cfg.cut_embed & cfg.cut_not_fakes
 signal_region_Embed_nofakes = cut_signal & cfg.cut_embed & cfg.cut_not_fakes & cfg.cut_not_embed
 # signal_region_MC_nojetfakes_noembed_cut = cut_signal & cfg.cut_not_fakes_not_embed
 signal_region_MC_nojetfakes_noembed_cut = cut_signal & cfg.cut_not_fakes
 signal_region_signalMC_cut = cut_signal
 
-
+#fake factor cuts
 l1_FakeFactorApplication_Region_cut = basic_cuts & cfg.cuts_iso['l1_VLoose'] & ~cfg.cuts_iso['l1_Tight'] & cfg.cuts_iso['l2_Tight']
 # l1_FakeFactorApplication_Region_notjetfakes_cut = l1_FakeFactorApplication_Region_cut & ~cfg.cut_l1_fakejet & cfg.cut_not_embed
 l1_FakeFactorApplication_Region_notjetfakes_cut = l1_FakeFactorApplication_Region_cut & ~cfg.cut_l1_fakejet
@@ -99,6 +99,17 @@ l2_FakeFactorApplication_Region_cut = basic_cuts & cfg.cuts_iso['l2_VLoose'] & ~
 l2_FakeFactorApplication_Region_notjetfakes_cut = l2_FakeFactorApplication_Region_cut & ~cfg.cut_l2_fakejet
 # l2_FakeFactorApplication_Region_notjetfakes_cut_embed = l2_FakeFactorApplication_Region_cut & ~cfg.cut_l2_fakejet & cfg.cut_embed
 l2_FakeFactorApplication_Region_notjetfakes_cut_embed = l2_FakeFactorApplication_Region_cut & ~cfg.cut_l2_fakejet & cfg.cut_embed & cfg.cut_l2_fakejet
+
+# ABCD method cuts
+
+basic_ABCD_cut = cfg.cuts_flags.all() & cfg.cuts_vetoes.all() & cfg.cut_triggers & cfg.cuts_against_leptons.all()
+if category == 'nobtag':
+    basic_ABCD_cut = basic_ABCD_cut & cfg.cut_nobtag
+elif category == 'btag':
+    basic_ABCD_cut = basic_ABCD_cut & cfg.cut_btag
+anti_isolated_os_region_cut = basic_ABCD_cut & cfg.cut_os & ~(cfg.cuts_iso['l1_Tight'] & cfg.cuts_iso['l2_Tight']) & (cfg.cuts_iso['l1_VLoose'] & cfg.cuts_iso['l2_VLoose'])
+isolated_ss_region_cut = basic_ABCD_cut & ~(cfg.cut_os) & cfg.cuts_iso['l1_Tight'] & cfg.cuts_iso['l2_Tight'] & (cfg.cuts_iso['l1_VLoose'] & cfg.cuts_iso['l2_VLoose'])
+anti_isolated_ss_region_cut = basic_ABCD_cut & ~(cfg.cut_os) & ~(cfg.cuts_iso['l1_Tight'] & cfg.cuts_iso['l2_Tight']) & (cfg.cuts_iso['l1_VLoose'] & cfg.cuts_iso['l2_VLoose'])
 
 #### cuts+weights
 signal_region = cut_signal * cfg.weights['weight']
@@ -119,6 +130,12 @@ l2_FakeFactorApplication_Region_notjetfakes_MC = l2_FakeFactorApplication_Region
 # l2_FakeFactorApplication_Region_notjetfakes_DY = l2_FakeFactorApplication_Region_notjetfakes_cut * cfg.weights['weight'] * cfg.weights['l2_fake']# * cfg.weights['DY'] 
 # l1_FakeFactorApplication_Region_notjetfakes_TT = l1_FakeFactorApplication_Region_notjetfakes_cut * cfg.weights['weight'] * cfg.weights['l1_fake']# * cfg.weights['TT']
 # l2_FakeFactorApplication_Region_notjetfakes_TT = l2_FakeFactorApplication_Region_notjetfakes_cut * cfg.weights['weight'] * cfg.weights['l2_fake']# * cfg.weights['TT']
+
+# ABCD method
+
+anti_isolated_os_region = anti_isolated_os_region_cut* cfg.weights['weight']
+isolated_ss_region = isolated_ss_region_cut* cfg.weights['weight']
+anti_isolated_ss_region = anti_isolated_ss_region_cut* cfg.weights['weight']
 
 from htt_plot.systematics import sys_dict_samples
 if options.small_run:
@@ -220,7 +237,7 @@ sys_dict.update(sys_dict_weights)
 # Cfgs and components
 #########
 
-from htt_plot.tools.builder import build_cfgs, merge
+from htt_plot.tools.builder import build_cfgs, merge, ABCD
 from htt_plot.tools.builder import  merge_components as merge_comps
 from htt_plot.tools.utils import add_processes_per_component, add_simple_process
 
@@ -336,7 +353,134 @@ for variable in variables:
                                 l2_FakeFactorApplication_Region_data,#l2_FakeFactorApplication_Region,
                                 bins,
                                 mergedict = {'data_obs':['data']})
+
+    ### ABCD method
+    add_processes_per_component(cfgs,
+                                'data_obs_aiso_os',
+                                ['data_aiso_os'],
+                                cfg.datasets.data_datasets,
+                                variable,
+                                anti_isolated_os_region,
+                                cfg.cuts_datacards,
+                                l1_FakeFactorApplication_Region_data,#l1_FakeFactorApplication_Region,
+                                l2_FakeFactorApplication_Region_data,#l2_FakeFactorApplication_Region,
+                                bins,
+                                mergedict = {'data_obs_aiso_os':['data_aiso_os']})
+    add_processes_per_component(cfgs,
+                                'data_obs_iso_ss',
+                                ['data_iso_ss'],
+                                cfg.datasets.data_datasets,
+                                variable,
+                                isolated_ss_region,
+                                cfg.cuts_datacards,
+                                l1_FakeFactorApplication_Region_data,#l1_FakeFactorApplication_Region,
+                                l2_FakeFactorApplication_Region_data,#l2_FakeFactorApplication_Region,
+                                bins,
+                                mergedict = {'data_obs_iso_ss':['data_iso_ss']})
+    add_processes_per_component(cfgs,
+                                'data_obs_aiso_ss',
+                                ['data_aiso_ss'],
+                                cfg.datasets.data_datasets,
+                                variable,
+                                anti_isolated_ss_region,
+                                cfg.cuts_datacards,
+                                l1_FakeFactorApplication_Region_data,#l1_FakeFactorApplication_Region,
+                                l2_FakeFactorApplication_Region_data,#l2_FakeFactorApplication_Region,
+                                bins,
+                                mergedict = {'data_obs_aiso_ss':['data_aiso_ss']})
+    
+    def add_MC_backgrounds(cfgs,name,cut):
+        #DY
+        add_processes_per_component(cfgs,
+                                    'DY_{}'.format(name),
+                                    ['ZTT_{}'.format(name),'ZL_{}'.format(name),'ZJ_{}'.format(name)],
+                                    cfg.datasets.DY_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes_DY,
+                                    cfg.cuts_datacards,
+                                    l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes_DY,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes_DY,
+                                    bins,
+                                    mergedict = {'ZLL_{}'.format(name):['ZL_{}'.format(name),'ZJ_{}'.format(name)],
+                                                 'DY_{}'.format(name):['ZLL_{}'.format(name),'ZTT_{}'.format(name)]})
+
+        #TT
+        add_processes_per_component(cfgs,
+                                    'TT_{}'.format(name),
+                                    ['TTT_{}'.format(name),'TTJ_{}'.format(name),'TTL_{}'.format(name)],
+                                    cfg.datasets.TT_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes_TT,
+                                    cfg.cuts_datacards,
+                                    l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes_TT,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes_TT,
+                                    bins,
+                                    mergedict = {'TT_{}'.format(name):['TTT_{}'.format(name),'TTJ_{}'.format(name)]})
         
+        #Diboson
+        add_processes_per_component(cfgs,
+                                    'Diboson_{}'.format(name),
+                                    ['Diboson_VVT_{}'.format(name),'Diboson_VVJ_{}'.format(name),'Diboson_VVL_{}'.format(name)],
+                                    cfg.datasets.Diboson_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes,
+                                    cfg.cuts_datacards,
+                                    l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes,
+                                    bins,
+                                    mergedict = {'Diboson_{}'.format(name):['Diboson_VVT_{}'.format(name),'Diboson_VVJ_{}'.format(name)]})
+        
+        #EWK
+        add_processes_per_component(cfgs,
+                                    'EWK_{}'.format(name),
+                                    ['EWK_VVT_{}'.format(name),'EWK_VVJ_{}'.format(name),'EWK_VVL_{}'.format(name)],
+                                    cfg.datasets.EWK_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes,
+                                    cfg.cuts_datacards,
+                                    l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes,
+                                    bins,
+                                    mergedict = {'EWK_{}'.format(name):['EWK_VVT_{}'.format(name),'EWK_VVJ_{}'.format(name)]})
+        
+        #singleTop
+        add_processes_per_component(cfgs,
+                                    'singleTop_{}'.format(name),
+                                    ['singleTop_VVT_{}'.format(name),'singleTop_VVJ_{}'.format(name),'singleTop_VVL_{}'.format(name)],
+                                    cfg.datasets.singleTop_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes,
+                                    cfg.cuts_datacards,
+                                    l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes,
+                                    bins,
+                                    mergedict = {'singleTop_{}'.format(name):['singleTop_VVT_{}'.format(name),'singleTop_VVJ_{}'.format(name)]})
+        
+        #VV
+        cfgs['VVL_{}'.format(name)] = merge('VVL_{}'.format(name), [cfgs['Diboson_VVL_{}'.format(name)],cfgs['singleTop_VVL_{}'.format(name)],cfgs['EWK_VVL_{}'.format(name)]])
+        cfgs['VVT_{}'.format(name)] = merge('VVT_{}'.format(name), [cfgs['Diboson_VVT_{}'.format(name)],cfgs['singleTop_VVT_{}'.format(name)],cfgs['EWK_VVL_{}'.format(name)]])
+        cfgs['VVJ_{}'.format(name)] = merge('VVJ_{}'.format(name), [cfgs['Diboson_VVJ_{}'.format(name)],cfgs['singleTop_VVJ_{}'.format(name)],cfgs['EWK_VVL_{}'.format(name)]])
+        cfgs['VV_{}'.format(name)] = merge('VV_{}'.format(name), [cfgs['VVJ'],cfgs['VVT']])
+        
+        #W
+        add_processes_per_component(cfgs,
+                                    'W_{}'.format(name),
+                                    ['WJ_{}'.format(name)],
+                                    cfg.datasets.WJ_datasets['nominal'],
+                                    variable,
+                                    cut,#signal_region_MC_nofakes,
+                                    cfg.cuts_datacards,l1_FakeFactorApplication_Region_notjetfakes_MC,#l1_FakeFactorApplication_Region_notjetfakes,
+                                    l2_FakeFactorApplication_Region_notjetfakes_MC,#l2_FakeFactorApplication_Region_notjetfakes,
+                                    bins,
+                                    mergedict = {'W_{}'.format(name):['WJ_{}'.format(name)]})
+
+    add_MC_backgrounds(cfgs, 'MC_ss_iso', )
+    add_MC_backgrounds(cfgs, 'MC_ss_aiso', )
+    add_MC_backgrounds(cfgs, 'MC_os_aiso', )
+
+    ###### end ABCD
+    
+    
     # Embedded
     add_processes_per_component(cfgs,
                                 'Embedded',
@@ -354,6 +498,10 @@ for variable in variables:
     cfgs['XTT'] = merge('XTT', [cfgs['ZTT'],
                                 cfgs['TTT'],
                                 cfgs['VVT']])
+
+    #ABCD method
+    cfgs['ABCD_QCD'] = ABCD(cfgs['data_obs_iso_ss'],cfgs['data_obs_aiso_ss'],cfgs['data_obs_aiso_os'],'ABCD_QCD')
+    
     
     # fakes
     cfgs['fakes'] = merge('fakes', [cfgs['fakes_data_obs'],
@@ -372,8 +520,10 @@ for variable in variables:
                             cfgs['EWK'],
                             cfgs['W'],
                             cfgs['data_obs'],
-                            cfgs['Embedded'],
-                            cfgs['fakes']]
+                            # cfgs['Embedded'],
+                            # cfgs['fakes'],
+                            cfgs['data_obs_aiso_os']
+    ]
 
     dc_comps[variable]['nominal'] = {
         'ZL' : cfgs['ZL'],
@@ -382,7 +532,11 @@ for variable in variables:
         'jetFakes' : cfgs['fakes'],
         'data_obs' : cfgs['data_obs'],
         'Embedded' : cfgs['Embedded'],
-        'XTT' : cfgs['XTT']
+        'XTT' : cfgs['XTT'],
+        'ABCD_QCD' : cfgs['ABCD_QCD'],
+        'data_obs_aiso_os' : cfgs['data_obs_aiso_os'],
+        'data_obs_aiso_ss' : cfgs['data_obs_aiso_ss'],
+        'data_obs_iso_ss' : cfgs['data_obs_iso_ss'],
     }
     for mass in mass_points:
         dc_comps[variable]['nominal']['ggH{}'.format(mass)] = cfgs['ggH{}'.format(mass)]

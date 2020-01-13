@@ -57,6 +57,14 @@ def merge(name, objs):
     else:
         return merge_components(name, objs)
 
+def ABCD(cfg1,cfg2,cfg3,name):
+    CD_ratio = cfg1.histogram.Integral()/cfg2.histogram.Integral()
+    cfg4 = cfg3.Clone(name)
+    cfg4.histogram.Scale(CD_ratio)
+    return cfg4
+
+ABCD = delayed(ABCD)
+
 def project(comp):
     ''' fills a component histogram following its configuration file '''
     dataset = comp.cfg['dataset']
